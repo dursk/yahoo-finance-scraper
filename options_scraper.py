@@ -1,5 +1,4 @@
 from datetime import datetime
-from decimal import Decimal
 
 import requests
 from bs4 import BeautifulSoup

@@ -38,3 +38,5 @@ which at the time is:
     'volatility'
 
 All values are python strings.
+
+Lots more functionality to come. Stay tuned!
