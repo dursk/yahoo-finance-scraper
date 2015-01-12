@@ -68,7 +68,7 @@ def main():
     data = {}
     for date, name in contracts.iteritems():
         data[date] = get_options_data_for_contract(ticker, name)
-    print data
+    return data
 
 
 if __name__ == '__main__':
