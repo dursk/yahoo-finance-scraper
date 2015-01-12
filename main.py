@@ -54,11 +54,9 @@ def get_options_data_for_contract(ticker, contract):
     url = '{}&date={}'.format(BASE_URL.format(ticker), contract)
     soup = get_soup(url)
     table = soup.find_all('table', class_='quote-table')
-    call_table = table[0]
-    put_table = table[1]
     return {
-        'calls': get_particular_option_data(call_table),
-        'puts': get_particular_option_data(put_table)
+        'calls': get_particular_option_data(table[0]),
+        'puts': get_particular_option_data(table[1])
     }
 
 
