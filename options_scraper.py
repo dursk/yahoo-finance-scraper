@@ -1,7 +1,11 @@
+import csv
 from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
+
+from data import RAW_HTML_1
+from data2 import RAW_HTML_2
 
 
 BASE_URL = 'http://finance.yahoo.com/q/op?s={}'
@@ -47,8 +51,9 @@ def _get_particular_option_data(table):
     return contracts
 
 def _get_options_data_for_contract(ticker, contract):
-    url = '{}&date={}'.format(BASE_URL.format(ticker), contract)
-    soup = _get_soup(url)
+    # url = '{}&date={}'.format(BASE_URL.format(ticker), contract)
+    # soup = _get_soup(url)
+    soup = BeautifulSoup(contract, 'lxml')
     table = soup.find_all('table', class_='quote-table')
     return {
         'calls': _get_particular_option_data(table[0]),
@@ -56,9 +61,32 @@ def _get_options_data_for_contract(ticker, contract):
     }
 
 
-def get_options_data(ticker):
-    contracts = _get_contract_query_params(ticker)
+def convert_to_csv(data, filename):
+    with open(filename, 'w+') as f:
+        writer = csv.writer(f)
+        writer.writerow(CONTRACT_KEYS)
+        for date in data:
+            writer.writerow([date])
+            contracts = data[date]
+            for call_or_put in contracts:
+                writer.writerow([call_or_put])
+                for contract in contracts[call_or_put]:
+                    writer.writerow([contract[col] for col in CONTRACT_KEYS])
+
+
+def get_options_data(ticker, csv=False, csv_filename=None):
+    # contracts = _get_contract_query_params(ticker)
+    contracts = {
+        datetime.min: RAW_HTML_1,
+        datetime.max: RAW_HTML_2
+    }
     data = {}
     for date, name in contracts.iteritems():
         data[date] = _get_options_data_for_contract(ticker, name)
+
+    if csv:
+        if not csv_filename:
+            csv_filename = '{}-options.csv'.format(ticker)
+        return convert_to_csv(data, csv_filename)
+
     return data
