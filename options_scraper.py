@@ -51,9 +51,8 @@ def _get_particular_option_data(table):
     return contracts
 
 def _get_options_data_for_contract(ticker, contract):
-    # url = '{}&date={}'.format(BASE_URL.format(ticker), contract)
-    # soup = _get_soup(url)
-    soup = BeautifulSoup(contract, 'lxml')
+    url = '{}&date={}'.format(BASE_URL.format(ticker), contract)
+    soup = _get_soup(url)
     table = soup.find_all('table', class_='quote-table')
     return {
         'calls': _get_particular_option_data(table[0]),
@@ -75,11 +74,7 @@ def convert_to_csv(data, filename):
 
 
 def get_options_data(ticker, csv=False, csv_filename=None):
-    # contracts = _get_contract_query_params(ticker)
-    contracts = {
-        datetime.min: RAW_HTML_1,
-        datetime.max: RAW_HTML_2
-    }
+    contracts = _get_contract_query_params(ticker)
     data = {}
     for date, name in contracts.iteritems():
         data[date] = _get_options_data_for_contract(ticker, name)
