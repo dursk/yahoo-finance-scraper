@@ -8,7 +8,8 @@ from data import RAW_HTML_1
 from data2 import RAW_HTML_2
 
 
-BASE_URL = 'http://finance.yahoo.com/q/op?s={}'
+STOCK_URL = 'http://finance.yahoo.com/q/?s={}'
+OPTIONS_URL = 'http://finance.yahoo.com/q/op?s={}'
 CONTRACT_KEYS = [
     'strike',
     'name',
@@ -21,6 +22,27 @@ CONTRACT_KEYS = [
     'interest',
     'volatility'
 ]
+STOCK_KEYS = [
+    [
+        'close',
+        'open',
+        'bid',
+        'ask',
+        '1y target',
+        'beta',
+        'earnings date',
+    ],
+    [
+        'day range',
+        '52wk range',
+        'volume',
+        '3m volume',
+        'cap',
+        'p/e',
+        'eps',
+        'div/yield'
+    ]
+]
 
 
 def _get_soup(url):
@@ -28,7 +50,7 @@ def _get_soup(url):
     return BeautifulSoup(html_page, 'lxml')
 
 def _get_contract_query_params(ticker):
-    url = BASE_URL.format(ticker)
+    url = OPTIONS_URL.format(ticker)
     soup = _get_soup(url)
     contract_list = soup.find('select', class_='Start-0')
     contract_soup = BeautifulSoup(str(contract_list), 'lxml')
@@ -51,7 +73,7 @@ def _get_particular_option_data(table):
     return contracts
 
 def _get_options_data_for_contract(ticker, contract):
-    url = '{}&date={}'.format(BASE_URL.format(ticker), contract)
+    url = '{}&date={}'.format(OPTIONS_URL.format(ticker), contract)
     soup = _get_soup(url)
     table = soup.find_all('table', class_='quote-table')
     return {
@@ -72,6 +94,27 @@ def convert_to_csv(data, filename):
                 for contract in contracts[call_or_put]:
                     writer.writerow([contract[col] for col in CONTRACT_KEYS])
 
+
+def _get_current_stock_price(soup):
+    return soup.find('span', class_='time_rtq_ticker').text
+
+def _parse_stock_data_table(soup):
+    stock_dict = {}
+    tables = [soup.find(id='table1'), soup.find(id='table2')]
+    for elem in zip(STOCK_KEYS, tables):
+        keys, table = elem
+        table = BeautifulSoup(str(table), 'lxml')
+        for i, cell in enumerate(table.find_all('td')):
+            stock_dict[keys[i]] = cell.text
+    return stock_dict
+
+def get_stock_data(ticker):
+    soup = _get_soup(STOCK_URL.format(ticker))
+    current_price = _get_current_stock_price(soup)
+    data = _parse_stock_data_table(soup)
+    data['ticker'] = ticker
+    data['current'] = current_price
+    return data
 
 def get_options_data(ticker, csv=False, csv_filename=None):
     contracts = _get_contract_query_params(ticker)
