@@ -101,6 +101,7 @@ class OptionsScraper(BaseScraper):
         contract_names = contract_soup.find_all('option')
         contracts = {}
         for contract in contract_names:
+            print contract.text
             formatted_date = contract.text
             contracts[formatted_date] = contract['value']
         return contracts
@@ -125,20 +126,28 @@ class OptionsScraper(BaseScraper):
             'puts': self._parse_table(table[self.PUT_INDEX])
         }
 
+    def _write_all_data_to_csv(self, writer):
+        writer.writerow(self.CONTRACT_KEYS)
+        options = self.get_data()
+        for date in options:
+            writer.writerow([date])
+            contracts = options[date]
+            for option_type in contracts:
+                writer.writerow([option_type])
+                for contract in contracts[option_type]:
+                    writer.writerow(
+                        [contract[key] for key in self.CONTRACT_KEYS]
+                    )
+
     def get_data(self):
         data = {}
         for date, query_param in self.expiration_dates.iteritems():
             data[date] = self._get_data_for_exp_date(query_param)
         return data
 
-# def convert_to_csv(data, filename):
-#     with open(filename, 'w+') as f:
-#         writer = csv.writer(f)
-#         writer.writerow(CONTRACT_KEYS)
-#         for date in data:
-#             writer.writerow([date])
-#             contracts = data[date]
-#             for call_or_put in contracts:
-#                 writer.writerow([call_or_put])
-#                 for contract in contracts[call_or_put]:
-#                     writer.writerow([contract[col] for col in CONTRACT_KEYS])
+    def csv_export(self, filename=None):
+        if not filename:
+            filename = '{}options.csv'.format(self.ticker)
+        with open(filename, 'w+') as f:
+            writer = csv.writer(f)
+            self._write_all_data_to_csv(writer)
