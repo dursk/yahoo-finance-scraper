@@ -57,6 +57,19 @@ class StockScraper(BaseScraper):
                 stock[keys[i]] = cell.text
         return stock
 
+    def _write_csv_headers(self, writer):
+        header_row = ['current']
+        for sub_list in self.STOCK_KEYS:
+            header_row.extend(sub_list)
+        writer.writerow(header_row)
+
+    def _write_csv_data_row(self, writer):
+        data = self.get_data()
+        row = [data['current']]
+        for sub_list in self.STOCK_KEYS:
+            row.extend([data[i] for i in sub_list])
+        writer.writerow(row)
+
     def get_current_price(self, soup=None):
         if not soup:
             soup = self._get_soup(self.url)
@@ -68,6 +81,14 @@ class StockScraper(BaseScraper):
         data['ticker'] = self.ticker
         data['current'] = self.get_current_price(soup)
         return data
+
+    def export_to_csv(self, filename=None):
+        if not filename:
+            filename = '{}.csv'.format(self.ticker)
+        with open(filename, 'w+') as f:
+            writer = csv.writer(f)
+            self._write_csv_headers(writer)
+            self._write_csv_data_row(writer)
 
 
 class OptionsScraper(BaseScraper):
@@ -145,7 +166,7 @@ class OptionsScraper(BaseScraper):
             data[date] = self._get_data_for_exp_date(query_param)
         return data
 
-    def csv_export(self, filename=None):
+    def export_to_csv(self, filename=None):
         if not filename:
             filename = '{}options.csv'.format(self.ticker)
         with open(filename, 'w+') as f:
