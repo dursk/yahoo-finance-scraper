@@ -4,6 +4,7 @@
     >>> scraper = OptionsScraper('GOOG')
     >>> scraper.get_data()
     {
+        'underlying': '34.11',
         expiration_date1: {
             'puts': {
                 ...

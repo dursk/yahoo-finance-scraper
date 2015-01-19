@@ -122,7 +122,6 @@ class OptionsScraper(BaseScraper):
         contract_names = contract_soup.find_all('option')
         contracts = {}
         for contract in contract_names:
-            print contract.text
             formatted_date = contract.text
             contracts[formatted_date] = contract['value']
         return contracts
@@ -148,6 +147,7 @@ class OptionsScraper(BaseScraper):
         }
 
     def _write_all_data_to_csv(self, writer):
+        writer.writerow(['Underlying:', options.pop('underlying')])
         writer.writerow(self.CONTRACT_KEYS)
         options = self.get_data()
         for date in options:
@@ -164,6 +164,7 @@ class OptionsScraper(BaseScraper):
         data = {}
         for date, query_param in self.expiration_dates.iteritems():
             data[date] = self._get_data_for_exp_date(query_param)
+        data['underlying'] = StockScraper(self.ticker).get_current_price()
         return data
 
     def export_to_csv(self, filename=None):
