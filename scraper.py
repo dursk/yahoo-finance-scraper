@@ -8,16 +8,15 @@ from bs4 import BeautifulSoup
 class BaseScraper(object):
     BASE_URL = None
 
-    def __init__(self, ticker):
-        self.ticker = ticker
-        self.url = '{}?s={}'.format(self.BASE_URL, ticker)
-
     def _get_soup(self, url):
         html = requests.get(url).content
         return BeautifulSoup(html, 'lxml')
 
     def _convert_to_soup(self, html):
         return BeautifulSoup(str(html), 'lxml')
+
+    def _get_url(self, ticker):
+        return '{}?s={}'.format(self.BASE_URL, ticker)
 
     def get_data(self):
         raise NotImplementedError
@@ -70,20 +69,19 @@ class StockScraper(BaseScraper):
             row.extend([data[i] for i in sub_list])
         writer.writerow(row)
 
-    def get_current_price(self, soup=None):
-        if not soup:
-            soup = self._get_soup(self.url)
+    def _get_current_price(self, soup):
         return soup.find('span', class_='time_rtq_ticker').text
 
-    def get_data(self):
-        soup = self._get_soup(self.url)
+    def get_data(self, ticker):
+        url = self._get_url(ticker)
+        soup = self._get_soup(url)
         data = self._parse_table(soup)
-        data['current'] = self.get_current_price(soup)
-        return {self.ticker: data}
+        data['current'] = self._get_current_price(soup)
+        return {ticker: data}
 
-    def export_to_csv(self, filename=None):
+    def export_to_csv(self, ticker, filename=None):
         if not filename:
-            filename = '{}.csv'.format(self.ticker)
+            filename = '{}.csv'.format(ticker)
         with open(filename, 'w+') as f:
             writer = csv.writer(f)
             self._write_csv_headers(writer)
@@ -108,14 +106,8 @@ class OptionsScraper(BaseScraper):
     BASE_URL = 'http://finance.yahoo.com/q/op'
     _expiration_dates = None
 
-    @property
-    def expiration_dates(self):
-        if not self._expiration_dates:
-            self._expiration_dates = self._get_expiration_dates()
-        return self._expiration_dates
-
-    def _get_expiration_dates(self):
-        soup = self._get_soup(self.url)
+    def _get_expiration_dates(self, url):
+        soup = self._get_soup(url)
         contract_list = soup.find('select', class_='Start-0')
         contract_soup = self._convert_to_soup(contract_list)
         contract_names = contract_soup.find_all('option')
@@ -137,8 +129,8 @@ class OptionsScraper(BaseScraper):
             contracts.append(contract)
         return contracts
 
-    def _get_data_for_exp_date(self, query_param):
-        soup = self._get_soup('{}&date={}'.format(self.url, query_param))
+    def _get_data_for_exp_date(self, url, query_param):
+        soup = self._get_soup('{}&date={}'.format(url, query_param))
         table = soup.find_all('table', class_='quote-table')
         return {
             'calls': self._parse_table(table[self.CALL_INDEX]),
@@ -159,11 +151,13 @@ class OptionsScraper(BaseScraper):
                         [contract[key] for key in self.CONTRACT_KEYS]
                     )
 
-    def get_data(self):
+    def get_data(self, ticker):
+        url = self._get_url(ticker)
+        exp_dates = self._get_expiration_dates(url)
         data = {}
-        for date, query_param in self.expiration_dates.iteritems():
-            data[date] = self._get_data_for_exp_date(query_param)
-        data['underlying'] = StockScraper(self.ticker).get_current_price()
+        for date, query_param in exp_dates.iteritems():
+            data[date] = self._get_data_for_exp_date(url, query_param)
+        data['underlying'] = StockScraper().get_data(ticker).get(ticker)
         return data
 
     def export_to_csv(self, filename=None):
