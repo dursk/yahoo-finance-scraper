@@ -78,9 +78,8 @@ class StockScraper(BaseScraper):
     def get_data(self):
         soup = self._get_soup(self.url)
         data = self._parse_table(soup)
-        data['ticker'] = self.ticker
         data['current'] = self.get_current_price(soup)
-        return data
+        return {self.ticker: data}
 
     def export_to_csv(self, filename=None):
         if not filename:
