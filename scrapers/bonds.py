@@ -1,3 +1,5 @@
+import csv
+
 from base_scraper import BaseScraper
 
 from bs4 import BeautifulSoup
@@ -32,10 +34,22 @@ class BondScraper(BaseScraper):
 
 
     def get_data(self):
-        soup = self._get_soup(BASE_URL)
+        soup = self._get_soup(self.BASE_URL)
         bond_tables = soup.find_all('table', class_='yfirttbl')
         bonds = {}
         for i, table in enumerate(bond_tables):
             ret = self._parse_table(table)
             bonds[self.BOND_TYPES[i]] = ret
         return bonds
+
+    def export_to_csv(self, filename='bonds.csv'):
+        with open(filename, 'w+') as f:
+            writer = csv.writer(f)
+            writer.writerow(['maturity'] + self.BOND_KEYS)
+            bonds = self.get_data()
+            for bond_type in bonds:
+                writer.writerow([bond_type])
+                for maturity in bonds[bond_type]:
+                    bond = bonds[bond_type][maturity]
+                    prices = [bond[key] for key in self.BOND_KEYS]
+                    writer.writerow([maturity] + prices)
