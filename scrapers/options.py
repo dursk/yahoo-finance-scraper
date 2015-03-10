@@ -1,6 +1,7 @@
 import csv
 
 from base_scraper import BaseScraper
+from stocks import StockScraper
 
 
 class OptionScraper(BaseScraper):
