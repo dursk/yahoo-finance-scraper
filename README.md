@@ -1,7 +1,7 @@
 ## Quick Start
 
     >>> from scraper import OptionsScraper
-    >>> scraper = OptionsScraper('GOOG')
+    >>> scraper = OptionScraper('GOOG')
     >>> scraper.get_data()
     {
         'underlying': '34.11',

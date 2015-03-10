@@ -3,7 +3,7 @@ import csv
 from base_scraper import BaseScraper
 
 
-class OptionsScraper(BaseScraper):
+class OptionScraper(BaseScraper):
     CALL_INDEX = 0
     PUT_INDEX = 1
     CONTRACT_KEYS = [
