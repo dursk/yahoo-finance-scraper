@@ -1,3 +1,4 @@
+from itertools import izip
 from pprint import pprint
 
 import requests
@@ -7,8 +8,8 @@ from bs4 import BeautifulSoup
 URL = 'http://screener.finance.yahoo.com/stocks.html'
 
 
-def format_titles(titles):
-    titles = titles = [title.text.replace(':', '') for title in titles]
+def format_field_names(titles):
+    titles = [title.text.replace(':', '') for title in titles]
     formatted_titles = []
     for i, title in enumerate(titles):
         if title == 'Min':
@@ -27,11 +28,14 @@ def format_titles(titles):
 
 soup = BeautifulSoup(requests.get(URL).content, 'lxml')
 
-selects = soup.find_all('select')
-titles = soup.find_all('font', attrs={'face': 'arial', 'size':'-1'})
-titles.pop(0)
-titles = format_titles(titles)
+field_ids = soup.find_all('select')
+field_names = soup.find_all('font', attrs={'face': 'arial', 'size':'-1'})
+field_names.pop(0)
+field_names = format_field_names(field_names)
 
-choices = { select['name']: title for select, title in zip(selects, titles)}
+choices = {
+    field_id['name']: field_name
+    for field_id, field_name in izip(field_ids, field_names)
+}
 
 pprint(choices)
