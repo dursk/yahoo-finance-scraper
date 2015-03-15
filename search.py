@@ -25,26 +25,33 @@ def format_field_names(titles):
             formatted_titles.append(title)
     return formatted_titles
 
+def main():
 
-soup = BeautifulSoup(requests.get(URL).content, 'lxml')
+    soup = BeautifulSoup(requests.get(URL).content, 'lxml')
 
-field_ids = soup.find_all('select')
-field_names = soup.find_all('font', attrs={'face': 'arial', 'size':'-1'})
-field_names.pop(0)
-field_names = format_field_names(field_names)
+    field_ids = soup.find_all('select')
+    field_names = soup.find_all('font', attrs={'face': 'arial', 'size':'-1'})
+    field_names.pop(0)
+    field_names = format_field_names(field_names)
 
-choices = {
-    field_id['name']: field_name
-    for field_id, field_name in izip(field_ids, field_names)
-}
+    field_mappings = {
+        field_id['name']: field_name
+        for field_id, field_name in izip(field_ids, field_names)
+    }
 
-choices_with_options = {}
+    fields_with_options = {}
 
-for field in field_ids:
-    temp = {}
-    for option in field.children:
-        if not option.text.strip().startswith('---'):
-            temp[option['value']] = str(option.text.strip().replace('\n', ' '))
-    choices_with_options[field['name']] = temp
+    for field in field_ids:
+        temp = {}
+        for option in field.children:
+            if not option.text.startswith('---'):
+                temp[option['value']] = str(
+                    option.text.strip().replace('\n', ' ')
+                )
+                fields_with_options[field['name']] = temp
 
-pprint(choices_with_options)
+    pprint(field_mappings)
+    pprint(fields_with_options)
+
+if __name__ == '__main__':
+    main()
