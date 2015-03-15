@@ -38,4 +38,13 @@ choices = {
     for field_id, field_name in izip(field_ids, field_names)
 }
 
-pprint(choices)
+choices_with_options = {}
+
+for field in field_ids:
+    temp = {}
+    for option in field.children:
+        if not option.text.strip().startswith('---'):
+            temp[option['value']] = str(option.text.strip().replace('\n', ' '))
+    choices_with_options[field['name']] = temp
+
+pprint(choices_with_options)
