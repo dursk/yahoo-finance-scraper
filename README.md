@@ -1,8 +1,8 @@
 ## Quick Start
 
     >>> from scraper.options import OptionScraper
-    >>> scraper = OptionScraper()
-    >>> scraper.get_data('GOOG')
+    >>> option_scraper = OptionScraper()
+    >>> option_scraper.get_data('GOOG')
     {
         'underlying': '34.11',
         expiration_date1: {
@@ -24,16 +24,16 @@
 The `'puts'` and `'calls'` dictionaries will contain
 `key/value` pairs for all the available data from yahoo,
 which at the time is:
-    'strike',
-    'name',
-    'last',
-    'bid',
-    'ask',
-    'change',
-    '%change',
-    'volume',
-    'interest',
-    'volatility'
+- `'strike'`
+- `'name'`
+- `'last'`
+- `'bid'`
+- `'ask'`
+- `'change'`
+- `'%change'`
+- `'volume'`
+- `'interest'`
+- `'volatility'`
 
 All values are python strings.
 
@@ -42,8 +42,8 @@ All values are python strings.
 Get data for a single stock:
 
     >>> from scraper.stocks import StockScraper
-    >>> scraper = StockScraper()
-    >>> scraper.get_data('AAPL')
+    >>> stock_scraper = StockScraper()
+    >>> stock_scraper.get_data('AAPL')
         {
             'name': 'AAPL',
             'current': '300.00',
@@ -53,13 +53,13 @@ Get data for a single stock:
 
 Or you can retrieve a list of stocks:
 
-    >>> scraper.get_data(['AAPL', 'XON', 'GPRO'])
+    >>> stock_scraper.get_data(['AAPL', 'XON', 'GPRO'])
 
 ## Bond Data
 
     >>> from scraper.bonds import BondScraper
-    >>> scraper = BondScraper()
-    >>> scraper.get_data()
+    >>> bond_scraper = BondScraper()
+    >>> bond_scraper.get_data()
 
         {
             'treasury': {
@@ -74,10 +74,10 @@ Or you can retrieve a list of stocks:
 
 ## CSV Exports
 
-    >>> scraper.export_to_csv()
+    >>> stock_scraper.export_to_csv()
 
 or
 
-    >>> scraper.export_to_csv(filename='somerandomfilename.csv')
+    >>> stock_scraper.export_to_csv(filename='somerandomfilename.csv')
 
 Lots more functionality to come. Stay tuned!
