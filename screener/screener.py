@@ -7,23 +7,30 @@ import requests
 URL = 'http://screener.finance.yahoo.com/b'
 
 
-def get_csv(params):
+def search(params):
     if 'vw' not in params:
         params['vw'] = 0
     params['db'] = 'stocks'
-    _parse_page_content(requests.get(URL, params=params).content)
+    html = requests.get(URL, params=params).content
+    soup = BeautifulSoup(str(html), 'lxml')
+    table_attrs = {
+        'border': 1,
+        'cellpadding': 2,
+        'cellspacing': 0,
+        'width': '100%'
+    }
+    data_table = soup.find('table', attrs=table_attrs)
+    _write_to_csv(data_table)
 
+def _parse_table(data_table):
+    for row in data_table.find_all('tr'):
+        parsed_row = []
+        for cell in row.find_all('td'):
+            parsed_row.append(unicode(cell.text).encode('utf-8'))
+        yield parsed_row
 
-def _parse_page_content(content):
-    soup = BeautifulSoup(str(content), 'lxml')
-    table = soup.find('table', attrs={'border': 1,
-                                      'cellpadding': 2,
-                                      'cellspacing': 0,
-                                      'width': '100%'})
+def _write_to_csv(data_table):
     with open('screener_data.csv', 'w') as f:
         writer = csv.writer(f)
-        for row in table.find_all('tr'):
-            temp = []
-            for cell in row.find_all('td'):
-                temp.append(unicode(cell.text).encode('utf-8'))
-            writer.writerow(temp)
+        for row in _parse_table(data_table):
+            writer.writerow(row)
