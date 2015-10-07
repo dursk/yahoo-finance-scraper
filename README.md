@@ -1,6 +1,6 @@
 ## Quick Start
 
-    >>> from scraper.options import OptionScraper
+    >>> from scrapers.options import OptionScraper
     >>> option_scraper = OptionScraper()
     >>> option_scraper.get_data('GOOG')
     {
@@ -41,7 +41,7 @@ All values are python strings.
 
 Get data for a single stock:
 
-    >>> from scraper.stocks import StockScraper
+    >>> from scrapers.stocks import StockScraper
     >>> stock_scraper = StockScraper()
     >>> stock_scraper.get_data('AAPL')
         {
@@ -57,7 +57,7 @@ Or you can retrieve a list of stocks:
 
 ## Bond Data
 
-    >>> from scraper.bonds import BondScraper
+    >>> from scrapers.bonds import BondScraper
     >>> bond_scraper = BondScraper()
     >>> bond_scraper.get_data()
 
