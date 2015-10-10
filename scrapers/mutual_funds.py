@@ -66,6 +66,9 @@ class MutualFundScraper(BaseScraper):
             table = soup.find(id='yfi_fund_basics')
             table = self._convert_to_soup(table)
             data_points = table.find_all('td', class_='yfnc_tabledata1')
-            expense_ratio = data_points[3].text
-            data[ticker] = expense_ratio.replace('%' , '')
+            try:
+                expense_ratio = data_points[3].text.replace('%', '')
+            except IndexError:
+                expense_ratio = None
+            data[ticker] = expense_ratio
         return data
