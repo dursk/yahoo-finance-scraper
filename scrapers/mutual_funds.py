@@ -47,6 +47,13 @@ class MutualFundScraper(BaseScraper):
             data[ticker] = self._parse_tables(soup)
         return data
 
+    def get_three_year_sharpe(self, tickers):
+        data = self.get_risk_data(tickers)
+        return {
+            symbol: d.get('3 years', {}).get('sharpe_ratio')
+            for symbol, d in data.iteritems()
+        }
+
     def get_expense_ratio(self, tickers):
         if type(tickers) is str:
             tickers = [tickers]
