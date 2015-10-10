@@ -72,6 +72,35 @@ Or you can retrieve a list of stocks:
             ...
         }
 
+## Mutual Fund Data
+
+    >>> from scrapers.mutual_funds import MutualFundScraper
+    >>> mf_scraper = MutualFundScraper()
+    >>> mf_scraper.get_risk_data('GFFRX')
+
+        {
+            'GFFRX': {
+                '10 years': {
+                    'alpha': u'N/A',
+                    ...
+                },
+                '3 years': {
+                    'alpha': u'-1.39',
+                    ...
+                },
+                ...
+            }
+        }
+
+Also, you can directly get the expense ratio:
+
+    >>> mf_scraper.get_expense_ratio(['GFFRX', 'MDCAX'])
+
+        {
+            'GFFRX': '1.76',
+            'MDCAX': '1.40'
+        }
+
 ## CSV Exports
 
     >>> stock_scraper.export_to_csv()
