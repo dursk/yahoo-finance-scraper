@@ -37,7 +37,7 @@ class MutualFundScraper(BaseScraper):
             data[length] = self._parse_table(table)
         return data
 
-    def get_data(self, tickers):
+    def get_risk_data(self, tickers):
         if type(tickers) is str:
             tickers = [tickers]
         data = {}
@@ -45,4 +45,20 @@ class MutualFundScraper(BaseScraper):
             url = self._get_url(ticker)
             soup = self._get_soup(url)
             data[ticker] = self._parse_tables(soup)
+        return data
+
+    def get_expense_ratio(self, tickers):
+        if type(tickers) is str:
+            tickers = [tickers]
+        data = {}
+        for ticker in tickers:
+            url = self._get_url(ticker)
+            soup = self._get_soup(
+                'http://finance.yahoo.com/q?s={}'.format(ticker)
+            )
+            table = soup.find(id='yfi_fund_basics')
+            table = self._convert_to_soup(table)
+            data_points = table.find_all('td', class_='yfnc_tabledata1')
+            expense_ratio = data_points[3].text
+            data[ticker] = expense_ratio.replace('%' , '')
         return data
